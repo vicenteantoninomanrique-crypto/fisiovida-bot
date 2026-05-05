@@ -13,7 +13,7 @@
     max-width: 380px;
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    background: #fff;
+    background: #EDE8DF;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -30,11 +30,14 @@
   .chat-avatar {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+    background: #F8F6F2;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-size: 16px; color: #fff; font-weight: 600;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+  .chat-avatar img {
+    width: 24px; height: 24px;
+    object-fit: contain;
   }
   .header-text p { margin: 0; }
   .header-name { font-size: 14px; font-weight: 500; color: #fff; }
@@ -48,7 +51,7 @@
     min-height: 260px;
     max-height: 360px;
     overflow-y: auto;
-    background: #f7f8f5;
+    background: #EDE8DF;
   }
   .msg {
     max-width: 82%;
@@ -58,9 +61,9 @@
     line-height: 1.55;
   }
   .msg-bot {
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.08);
-    color: #2d2d2d;
+    background: #F8F6F2;
+    border: none;
+    color: #9A9A9A;
     align-self: flex-start;
     border-bottom-left-radius: 3px;
   }
@@ -71,7 +74,7 @@
     border-bottom-right-radius: 3px;
   }
   .msg-typing {
-    color: #888;
+    color: #9A9A9A;
     font-style: italic;
     font-size: 12px;
     align-self: flex-start;
@@ -80,20 +83,21 @@
     padding: 10px 12px;
     display: flex;
     gap: 8px;
-    background: #fff;
+    background: #F8F6F2;
     border-top: 1px solid rgba(0,0,0,0.07);
   }
   .input-area input {
     flex: 1;
-    border: 1px solid rgba(0,0,0,0.12);
+    border: none;
     border-radius: 20px;
     padding: 8px 14px;
     font-size: 13px;
     font-family: 'Inter', sans-serif;
     outline: none;
-    background: #f7f8f5;
+    background: #F8F6F2;
+    color: #9A9A9A;
   }
-  .input-area input:focus { border-color: #456248; }
+  .input-area input::placeholder { color: #9A9A9A; }
   .send-btn {
     width: 34px; height: 34px;
     border-radius: 50%;
@@ -111,14 +115,16 @@
 
 <div id="chat-window">
   <div class="chat-header">
-    <div class="chat-avatar">F</div>
+    <div class="chat-avatar">
+      <img src="logo.png" alt="FisioVida" />
+    </div>
     <div class="header-text">
-      <p class="header-name">Fiso · Asistente FisioVida</p>
+      <p class="header-name">Asistente Virtual</p>
       <p class="header-status">● En línea</p>
     </div>
   </div>
   <div id="messages">
-    <div class="msg msg-bot">¡Hola! Soy Fiso, el asistente virtual de FisioVida. Puedo ayudarte a resolver dudas, elegir tu tipo de sesión o reservar una cita. ¿En qué te ayudo?</div>
+    <div class="msg msg-bot">¡Hola! Soy el asistente virtual de FisioVida. Puedo ayudarte a resolver dudas, elegir tu tipo de sesión o reservar una cita. ¿En qué te ayudo?</div>
   </div>
   <div class="input-area">
     <input id="user-input" type="text" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter') sendMessage()" />
@@ -135,7 +141,7 @@
     const msgs = document.getElementById('messages');
     const div = document.createElement('div');
     div.className = 'msg ' + (type === 'typing' ? 'msg-typing' : 'msg-' + type);
-    div.textContent = type === 'typing' ? 'Fiso está escribiendo...' : text;
+    div.textContent = type === 'typing' ? 'Escribiendo...' : text;
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
     return div;
