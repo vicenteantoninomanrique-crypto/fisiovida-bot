@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: transparent; }
+
+  #chat-window {
+    width: 100%;
+    max-width: 380px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+    margin: 0 auto;
+  }
+  .chat-header {
+    background: #456248;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; color: #fff; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .header-text p { margin: 0; }
+  .header-name { font-size: 14px; font-weight: 500; color: #fff; }
+  .header-status { font-size: 11px; color: rgba(255,255,255,0.75); }
+
+  #messages {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 260px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: #f7f8f5;
+  }
+  .msg {
+    max-width: 82%;
+    border-radius: 12px;
+    padding: 9px 13px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .msg-bot {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    color: #2d2d2d;
+    align-self: flex-start;
+    border-bottom-left-radius: 3px;
+  }
+  .msg-user {
+    background: #456248;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 3px;
+  }
+  .msg-typing {
+    color: #888;
+    font-style: italic;
+    font-size: 12px;
+    align-self: flex-start;
+  }
+  .input-area {
+    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    background: #fff;
+    border-top: 1px solid rgba(0,0,0,0.07);
+  }
+  .input-area input {
+    flex: 1;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    background: #f7f8f5;
+  }
+  .input-area input:focus { border-color: #456248; }
+  .send-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: #456248;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .send-btn svg { width: 15px; height: 15px; fill: #fff; }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-avatar">F</div>
+    <div class="header-text">
+      <p class="header-name">Fiso · Asistente FisioVida</p>
+      <p class="header-status">● En línea</p>
+    </div>
+  </div>
+  <div id="messages">
+    <div class="msg msg-bot">¡Hola! Soy Fiso, el asistente virtual de FisioVida. Puedo ayudarte a resolver dudas, elegir tu tipo de sesión o reservar una cita. ¿En qué te ayudo?</div>
+  </div>
+  <div class="input-area">
+    <input id="user-input" type="text" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  const WEBHOOK_URL = 'https://sphere-grudge-front.ngrok-free.dev/webhook/bot-fisiovida';
+
+  function addMessage(text, type) {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'msg ' + (type === 'typing' ? 'msg-typing' : 'msg-' + type);
+    div.textContent = type === 'typing' ? 'Fiso está escribiendo...' : text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const btn = document.getElementById('send-btn');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+    btn.disabled = true;
+
+    const typing = addMessage('', 'typing');
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      typing.remove();
+      addMessage(data[0].reply, 'bot');
+    } catch (e) {
+      typing.remove();
+      addMessage('Lo siento, ahora mismo no puedo responder. Llámanos para más información.', 'bot');
+    }
+
+    btn.disabled = false;
+    input.focus();
+  }
+</script>
+
+</body>
+</html>
