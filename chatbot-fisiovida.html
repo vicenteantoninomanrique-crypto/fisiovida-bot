@@ -8,24 +8,57 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', sans-serif; background: transparent; }
 
-  #chat-window {
-    width: 100%;
-    max-width: 380px;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    background: #EDE8DF;
+  #chat-bubble {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #456248;
+    cursor: pointer;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    box-shadow: 0 4px 16px rgba(69,98,72,0.35);
+    z-index: 9999;
+    transition: transform 0.2s;
+  }
+  #chat-bubble:hover { transform: scale(1.05); }
+  #chat-bubble img {
+    width: 26px; height: 26px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  #chat-window {
+    position: fixed;
+    bottom: 88px;
+    right: 24px;
+    width: 340px;
+    max-height: 480px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    background: #EDE8DF;
+    display: none;
     flex-direction: column;
     overflow: hidden;
     border: 1px solid rgba(0,0,0,0.08);
-    margin: 0 auto;
+    z-index: 9998;
+    transition: opacity 0.2s, transform 0.2s;
   }
+  #chat-window.open {
+    display: flex;
+  }
+
   .chat-header {
     background: #456248;
     padding: 14px 18px;
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
   }
   .chat-avatar {
     width: 36px; height: 36px;
@@ -36,21 +69,31 @@
     overflow: hidden;
   }
   .chat-avatar img {
-    width: 24px; height: 24px;
+    width: 22px; height: 22px;
     object-fit: contain;
   }
   .header-text p { margin: 0; }
   .header-name { font-size: 14px; font-weight: 500; color: #fff; }
   .header-status { font-size: 11px; color: rgba(255,255,255,0.75); }
+  .close-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.75);
+    font-size: 20px;
+    line-height: 1;
+    padding: 0 0 0 8px;
+  }
+  .close-btn:hover { color: #fff; }
 
   #messages {
     padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-height: 260px;
-    max-height: 360px;
     overflow-y: auto;
+    flex: 1;
     background: #EDE8DF;
   }
   .msg {
@@ -62,7 +105,6 @@
   }
   .msg-bot {
     background: #F8F6F2;
-    border: none;
     color: #9A9A9A;
     align-self: flex-start;
     border-bottom-left-radius: 3px;
@@ -79,12 +121,14 @@
     font-size: 12px;
     align-self: flex-start;
   }
+
   .input-area {
     padding: 10px 12px;
     display: flex;
     gap: 8px;
     background: #F8F6F2;
     border-top: 1px solid rgba(0,0,0,0.07);
+    flex-shrink: 0;
   }
   .input-area input {
     flex: 1;
@@ -113,6 +157,10 @@
 </head>
 <body>
 
+<button id="chat-bubble" onclick="toggleChat()">
+  <img src="logo.png" alt="FisioVida" />
+</button>
+
 <div id="chat-window">
   <div class="chat-header">
     <div class="chat-avatar">
@@ -122,6 +170,7 @@
       <p class="header-name">Asistente Virtual</p>
       <p class="header-status">● En línea</p>
     </div>
+    <button class="close-btn" onclick="toggleChat()">×</button>
   </div>
   <div id="messages">
     <div class="msg msg-bot">¡Hola! Soy el asistente virtual de FisioVida. Puedo ayudarte a resolver dudas, elegir tu tipo de sesión o reservar una cita. ¿En qué te ayudo?</div>
@@ -136,6 +185,10 @@
 
 <script>
   const WEBHOOK_URL = 'https://sphere-grudge-front.ngrok-free.dev/webhook/bot-fisiovida';
+
+  function toggleChat() {
+    document.getElementById('chat-window').classList.toggle('open');
+  }
 
   function addMessage(text, type) {
     const msgs = document.getElementById('messages');
